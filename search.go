@@ -3,6 +3,7 @@ package search
 import (
 	"bytes"
 	"encoding/json"
+	"html/template"
 	"net/http"
 	"time"
 
@@ -20,6 +21,7 @@ type Search struct {
 
 // ServerHTTP is the HTTP handler for this middleware
 func (s *Search) ServeHTTP(w http.ResponseWriter, r *http.Request) (int, error) {
+
 	if httpserver.Path(r.URL.Path).Matches(s.Config.Endpoint) {
 		if r.Header.Get("Accept") == "application/json" || s.Config.Template == nil {
 			return s.SearchJSON(w, r)
@@ -52,7 +54,7 @@ func (s *Search) ServeHTTP(w http.ResponseWriter, r *http.Request) (int, error) 
 type Result struct {
 	Path     string
 	Title    string
-	Body     string
+	Body     template.HTML
 	Modified time.Time
 	Indexed  time.Time
 }
@@ -71,7 +73,7 @@ func (s *Search) SearchJSON(w http.ResponseWriter, r *http.Request) (int, error)
 			Title:    result.Title(),
 			Modified: result.Modified(),
 			Indexed:  result.Indexed(),
-			Body:     string(body),
+			Body:     template.HTML(body),
 		}
 	}
 
@@ -87,7 +89,6 @@ func (s *Search) SearchJSON(w http.ResponseWriter, r *http.Request) (int, error)
 // SearchHTML renders the search results in the HTML template
 func (s *Search) SearchHTML(w http.ResponseWriter, r *http.Request) (int, error) {
 	q := r.URL.Query().Get("q")
-
 	indexResult := s.Indexer.Search(q)
 
 	results := make([]Result, len(indexResult))
@@ -97,7 +98,7 @@ func (s *Search) SearchHTML(w http.ResponseWriter, r *http.Request) (int, error)
 			Path:     result.Path(),
 			Title:    result.Title(),
 			Modified: result.Modified(),
-			Body:     string(result.Body()),
+			Body:     template.HTML(result.Body()),
 		}
 	}
 

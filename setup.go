@@ -3,6 +3,7 @@ package search
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 	"html/template"
 	"os"
 	"path/filepath"
@@ -218,6 +219,7 @@ func ParseSearchConfig(c *caddy.Controller, cnf *httpserver.SiteConfig) (*Config
 				if c.NextArg() {
 					conf.Template, err = template.ParseFiles(filepath.Join(conf.SiteRoot, c.Val()))
 					if err != nil {
+						fmt.Println(err)
 						return nil, err
 					}
 				}

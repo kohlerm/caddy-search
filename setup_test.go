@@ -96,8 +96,8 @@ var (
 func TestSearchSetup(t *testing.T) {
 	for _, kase := range configCases {
 		Convey("Given a Caddy controller with the search middleware", t, func() {
-			c := caddy.NewTestController(kase.config)
-			cnf := httpserver.GetConfig("")
+			c := caddy.NewTestController(kase.config, "")
+			cnf := httpserver.GetConfig(c)
 			result, err := search.ParseSearchConfig(c, cnf)
 			Convey("Should not receive an error when parsing", func() {
 				So(err, ShouldBeNil)
